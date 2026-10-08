@@ -1,9 +1,14 @@
 import streamlit as st
 import requests
+import pandas as pd
+import os
 
+
+# ==========================================
+# CONFIGURATION
+# ==========================================
 
 BACKEND_URL = "http://127.0.0.1:5000"
-
 
 st.set_page_config(
     page_title="PoisonGuard",
@@ -11,6 +16,10 @@ st.set_page_config(
     layout="wide"
 )
 
+
+# ==========================================
+# TITLE
+# ==========================================
 
 st.title("🛡️ PoisonGuard")
 
@@ -36,77 +45,117 @@ st.markdown(
     """
 )
 
+
+# ==========================================
+# API FUNCTION - POST
+# ==========================================
+
 def call_api(endpoint):
-
     try:
-
         response = requests.post(
             BACKEND_URL + endpoint,
             timeout=120
         )
 
         if response.status_code != 200:
-
             st.error(
                 f"Backend returned HTTP {response.status_code}"
             )
-
             st.code(response.text)
-
             return None
 
         try:
-
             return response.json()
 
         except ValueError:
-
             st.error(
                 "Backend returned a non-JSON response."
             )
-
             st.code(response.text)
-
             return None
 
     except requests.exceptions.ConnectionError:
-
         st.error(
             "Cannot connect to Flask backend. "
             "Make sure Flask is running on port 5000."
         )
-
         return None
 
     except requests.exceptions.Timeout:
-
         st.error(
             "Backend request timed out."
         )
-
         return None
 
     except Exception as error:
-
         st.error(
             f"Unexpected error: {error}"
         )
-
         return None
 
-    
 
+# ==========================================
+# API FUNCTION - GET
+# ==========================================
+
+def call_get_api(endpoint):
+    try:
+        response = requests.get(
+            BACKEND_URL + endpoint,
+            timeout=120
+        )
+
+        if response.status_code != 200:
+            st.error(
+                f"Backend returned HTTP {response.status_code}"
+            )
+            st.code(response.text)
+            return None
+
+        try:
+            return response.json()
+
+        except ValueError:
+            st.error(
+                "Backend returned a non-JSON response."
+            )
+            st.code(response.text)
+            return None
+
+    except requests.exceptions.ConnectionError:
+        st.error(
+            "Cannot connect to Flask backend. "
+            "Make sure Flask is running on port 5000."
+        )
+        return None
+
+    except requests.exceptions.Timeout:
+        st.error(
+            "Backend request timed out."
+        )
+        return None
+
+    except Exception as error:
+        st.error(
+            f"Unexpected error: {error}"
+        )
+        return None
+
+
+# ==========================================
+# SIDEBAR PIPELINE
+# ==========================================
 
 st.sidebar.header("PoisonGuard Pipeline")
 
 
-if st.sidebar.button(
-    "1️⃣ Train Baseline"
-):
+# ==========================================
+# 1. TRAIN BASELINE
+# ==========================================
 
-    result = call_api(
-        "/api/baseline"
-    )
+if st.sidebar.button("1️⃣ Train Baseline"):
+
+    result = call_api("/api/baseline")
 
     if result:
 
@@ -117,13 +166,13 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "2️⃣ Run Poisoning Attack"
-):
+# ==========================================
+# 2. RUN POISONING ATTACK
+# ==========================================
 
-    result = call_api(
-        "/api/poisoning"
-    )
+if st.sidebar.button("2️⃣ Run Poisoning Attack"):
+
+    result = call_api("/api/poisoning")
 
     if result:
 
@@ -134,9 +183,11 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "3️⃣ Detect Poison"
-):
+# ==========================================
+# 3. DETECT POISON
+# ==========================================
+
+if st.sidebar.button("3️⃣ Detect Poison"):
 
     result = call_api(
         "/api/poison-detection"
@@ -153,9 +204,11 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "4️⃣ Run Backdoor Attack"
-):
+# ==========================================
+# 4. RUN BACKDOOR ATTACK
+# ==========================================
+
+if st.sidebar.button("4️⃣ Run Backdoor Attack"):
 
     result = call_api(
         "/api/backdoor"
@@ -172,9 +225,11 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "5️⃣ Detect Backdoor"
-):
+# ==========================================
+# 5. DETECT BACKDOOR
+# ==========================================
+
+if st.sidebar.button("5️⃣ Detect Backdoor"):
 
     result = call_api(
         "/api/backdoor-detection"
@@ -191,9 +246,11 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "6️⃣ Mitigate & Retrain"
-):
+# ==========================================
+# 6. MITIGATE AND RETRAIN
+# ==========================================
+
+if st.sidebar.button("6️⃣ Mitigate & Retrain"):
 
     result = call_api(
         "/api/mitigate"
@@ -210,9 +267,11 @@ if st.sidebar.button(
         )
 
 
-if st.sidebar.button(
-    "7️⃣ Final Evaluation"
-):
+# ==========================================
+# 7. FINAL EVALUATION
+# ==========================================
+
+if st.sidebar.button("7️⃣ Final Evaluation"):
 
     result = call_api(
         "/api/evaluation"
@@ -229,14 +288,43 @@ if st.sidebar.button(
         )
 
 
+# ==========================================
+# 8. MODEL INTEGRITY
+# ==========================================
+
+if st.sidebar.button(
+    "8️⃣ Check Final Model Integrity"
+):
+
+    result = call_get_api(
+        "/api/model-integrity"
+    )
+
+    if result:
+
+        st.session_state[
+            "integrity"
+        ] = result
+
+        st.success(
+            "Model integrity verification completed."
+        )
+
+
+# ==========================================
+# MAIN DASHBOARD
+# ==========================================
+
 st.divider()
 
+st.header(
+    "📊 PoisonGuard Dashboard"
+)
 
-st.header("📊 PoisonGuard Dashboard")
 
-
-col1, col2, col3, col4 = st.columns(4)
-
+# ==========================================
+# GET SESSION STATE
+# ==========================================
 
 baseline = st.session_state.get(
     "baseline"
@@ -255,50 +343,274 @@ mitigation = st.session_state.get(
 )
 
 
+# ==========================================
+# DASHBOARD CARDS
+# ==========================================
+
+col1, col2, col3, col4 = st.columns(4)
+
+
+# ==========================================
+# BASELINE ACCURACY
+# ==========================================
+
 with col1:
+
+    if baseline and "results" in baseline:
+
+        baseline_accuracy = baseline[
+            "results"
+        ].get(
+            "accuracy",
+            "—"
+        )
+
+    else:
+
+        baseline_accuracy = "—"
 
     st.metric(
         "Baseline Accuracy",
-        baseline["results"]["accuracy"]
-        if baseline else "—"
+        baseline_accuracy
     )
 
+
+# ==========================================
+# POISONED SAMPLES
+# ==========================================
 
 with col2:
 
+    if poisoning:
+
+        poisoned_samples = poisoning.get(
+            "poisoned_samples"
+        )
+
+        if poisoned_samples is None:
+
+            poisoned_samples = poisoning.get(
+                "actual_poisoned"
+            )
+
+        if poisoned_samples is None:
+
+            poisoned_samples = "—"
+
+    else:
+
+        poisoned_samples = "—"
+
     st.metric(
         "Poisoned Samples",
-        poisoning["poisoned_samples"]
-        if poisoning else "—"
+        poisoned_samples
     )
 
+
+# ==========================================
+# DETECTED SAMPLES
+# ==========================================
 
 with col3:
 
+    if poison_detection:
+
+        detected_samples = poison_detection.get(
+            "suspicious_count",
+            "—"
+        )
+
+    else:
+
+        detected_samples = "—"
+
     st.metric(
         "Detected Samples",
-        poison_detection["suspicious_count"]
-        if poison_detection else "—"
+        detected_samples
     )
 
+
+# ==========================================
+# FINAL ACCURACY
+# ==========================================
 
 with col4:
 
+    final_accuracy = "—"
+
+    if mitigation:
+
+        if "final_results" in mitigation:
+
+            final_accuracy = mitigation[
+                "final_results"
+            ].get(
+                "accuracy",
+                "—"
+            )
+
+        elif "accuracy" in mitigation:
+
+            final_accuracy = mitigation[
+                "accuracy"
+            ]
+
     st.metric(
         "Final Accuracy",
-        mitigation[
-            "final_results"
-        ]["accuracy"]
-        if mitigation
-        else "—"
+        final_accuracy
     )
 
 
+# ==========================================
+# POISONING RATE EXPERIMENTS
+# ==========================================
+
 st.divider()
 
+st.header(
+    "🧪 Poisoning Rate Experiments"
+)
 
-st.header("🔬 Detection Results")
 
+experiment_file = (
+    "reports/results/"
+    "poisoning_experiment_results.csv"
+)
+
+
+if os.path.exists(experiment_file):
+
+    try:
+
+        experiment_data = pd.read_csv(
+            experiment_file
+        )
+
+
+        # ======================================
+        # RESULTS TABLE
+        # ======================================
+
+        st.subheader(
+            "Performance at Different Poisoning Rates"
+        )
+
+        st.dataframe(
+            experiment_data,
+            use_container_width=True
+        )
+
+
+        # ======================================
+        # ACCURACY GRAPH
+        # ======================================
+
+        st.subheader(
+            "📈 Accuracy vs Poisoning Rate"
+        )
+
+        chart_data = experiment_data[
+            [
+                "poisoning_rate",
+                "accuracy"
+            ]
+        ].copy()
+
+        chart_data[
+            "poisoning_rate"
+        ] = pd.to_numeric(
+            chart_data[
+                "poisoning_rate"
+            ]
+        )
+
+        chart_data = chart_data.sort_values(
+            "poisoning_rate"
+        )
+
+        chart_data = chart_data.reset_index(
+            drop=True
+        )
+
+        st.line_chart(
+            chart_data,
+            x="poisoning_rate",
+            y="accuracy"
+        )
+
+
+        # ======================================
+        # PRECISION RECALL F1 GRAPH
+        # ======================================
+
+        st.subheader(
+            "📊 Precision, Recall and F1 Score"
+        )
+
+        metrics_data = experiment_data[
+            [
+                "poisoning_rate",
+                "precision",
+                "recall",
+                "f1_score"
+            ]
+        ].copy()
+
+        metrics_data[
+            "poisoning_rate"
+        ] = pd.to_numeric(
+            metrics_data[
+                "poisoning_rate"
+            ]
+        )
+
+        metrics_data = metrics_data.sort_values(
+            "poisoning_rate"
+        )
+
+        metrics_data = metrics_data.reset_index(
+            drop=True
+        )
+
+        st.line_chart(
+            metrics_data,
+            x="poisoning_rate",
+            y=[
+                "precision",
+                "recall",
+                "f1_score"
+            ]
+        )
+
+
+    except Exception as error:
+
+        st.error(
+            f"Could not load experiment results: {error}"
+        )
+
+
+else:
+
+    st.info(
+        "Poisoning experiment results file not found."
+    )
+
+
+# ==========================================
+# DETECTION RESULTS
+# ==========================================
+
+st.divider()
+
+st.header(
+    "🔬 Detection Results"
+)
+
+
+# ==========================================
+# DATA POISONING DETECTION
+# ==========================================
 
 if "poison_detection" in st.session_state:
 
@@ -313,6 +625,10 @@ if "poison_detection" in st.session_state:
     )
 
 
+# ==========================================
+# BACKDOOR DETECTION
+# ==========================================
+
 if "backdoor_detection" in st.session_state:
 
     st.subheader(
@@ -326,7 +642,15 @@ if "backdoor_detection" in st.session_state:
     )
 
 
-st.header("📈 Model Evaluation")
+# ==========================================
+# MODEL EVALUATION
+# ==========================================
+
+st.divider()
+
+st.header(
+    "📈 Model Evaluation"
+)
 
 
 if "evaluation" in st.session_state:
@@ -343,59 +667,64 @@ if "evaluation" in st.session_state:
 
         col1, col2, col3, col4 = st.columns(4)
 
+
         with col1:
+
             st.metric(
                 "Accuracy",
                 result["accuracy"]
             )
 
+
         with col2:
+
             st.metric(
                 "Precision",
                 result["precision"]
             )
 
+
         with col3:
+
             st.metric(
                 "Recall",
                 result["recall"]
             )
 
+
         with col4:
+
             st.metric(
                 "F1",
                 result["f1_score"]
             )
 
 
-st.divider()
-
-
-st.header("🔐 Model Integrity")
-
-
-if st.button(
-    "Check Final Model Integrity"
-):
-
-    try:
-
-        response = requests.get(
-            BACKEND_URL
-            + "/api/model-integrity"
-        )
-
-        result = response.json()
-
-        st.json(result)
-
-    except Exception as error:
-
-        st.error(str(error))
-
+# ==========================================
+# MODEL INTEGRITY
+# ==========================================
 
 st.divider()
 
+st.header(
+    "🔐 Model Integrity"
+)
+
+
+if "integrity" in st.session_state:
+
+    st.json(
+        st.session_state[
+            "integrity"
+        ]
+    )
+
+
+# ==========================================
+# FOOTER
+# ==========================================
+
+st.divider()
 
 st.caption(
     "PoisonGuard | ML Security & Supply Chain Defense"
