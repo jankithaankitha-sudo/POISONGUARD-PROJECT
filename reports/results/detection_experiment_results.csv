@@ -1,0 +1,5 @@
+contamination,actual_poisoned,isolation_suspicious,isolation_detection_rate,label_disagreements,label_true_positives,label_false_positives,label_false_negatives,label_detection_rate,label_false_positive_rate
+0.05,45,23,0.0222,45,45,0,0,1.0,0.0
+0.1,45,46,0.0444,45,45,0,0,1.0,0.0
+0.15,45,69,0.0889,45,45,0,0,1.0,0.0
+0.2,45,91,0.1333,45,45,0,0,1.0,0.0

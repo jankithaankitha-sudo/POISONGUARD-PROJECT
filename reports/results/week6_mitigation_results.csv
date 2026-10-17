@@ -1,0 +1,4 @@
+model,accuracy,precision,recall,f1_score
+Baseline,0.9561,0.9589,0.9722,0.9655
+Poisoned,0.9474,0.9714,0.9444,0.9577
+Mitigated,0.9561,0.9718,0.9583,0.965

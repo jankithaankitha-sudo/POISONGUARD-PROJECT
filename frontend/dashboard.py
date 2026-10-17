@@ -729,3 +729,98 @@ st.divider()
 st.caption(
     "PoisonGuard | ML Security & Supply Chain Defense"
 )
+
+# ==========================================
+# PRACTICAL RESULTS DASHBOARD
+# ==========================================
+
+st.divider()
+st.header("🛡️ Practical Results Dashboard")
+
+# Detection experiment results
+st.subheader("🔍 Detection Experiment Results")
+
+detection_file = "reports/results/detection_experiment_results.csv"
+
+if os.path.exists(detection_file):
+    detection_df = pd.read_csv(detection_file)
+    st.dataframe(detection_df, use_container_width=True)
+
+    if {
+        "contamination",
+        "isolation_detection_rate",
+        "label_detection_rate",
+    }.issubset(detection_df.columns):
+        chart_df = detection_df[
+            [
+                "contamination",
+                "isolation_detection_rate",
+                "label_detection_rate",
+            ]
+        ].copy()
+
+        chart_df = chart_df.set_index("contamination")
+        st.line_chart(chart_df)
+else:
+    st.warning("Detection results not found. Run the detection experiment.")
+
+# Mitigation experiment results
+# Mitigation results
+st.divider()
+st.subheader("🛡️ Mitigation Evaluation")
+
+mitigation_file = "reports/results/week6_mitigation_results.csv"
+
+if os.path.exists(mitigation_file):
+    mitigation_df = pd.read_csv(mitigation_file)
+
+    # Display actual results
+    st.dataframe(
+        mitigation_df.style.format({
+            "accuracy": "{:.2%}",
+            "precision": "{:.2%}",
+            "recall": "{:.2%}",
+            "f1_score": "{:.2%}",
+        }),
+        use_container_width=True,
+    )
+
+    # Display model accuracy
+    cols = st.columns(len(mitigation_df))
+
+    for col, (_, result) in zip(cols, mitigation_df.iterrows()):
+        col.metric(
+            f"{result['model']} Accuracy",
+            f"{result['accuracy']:.2%}",
+        )
+
+    # Compare model accuracy
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.bar(
+        mitigation_df["model"],
+        mitigation_df["accuracy"] * 100,
+    )
+    ax.set_title("Model Accuracy Comparison")
+    ax.set_ylabel("Accuracy (%)")
+    ax.set_ylim(93, 97)
+    ax.grid(axis="y", alpha=0.3)
+
+    st.pyplot(fig)
+    plt.close(fig)
+
+else:
+    st.warning("Mitigation results CSV was not found.")
+
+# Automated testing
+st.divider()
+st.subheader("🧪 Automated Testing")
+
+test_file = "reports/results/test_results.txt"
+
+if os.path.exists(test_file):
+   with open(test_file, "r", encoding="utf-8-sig", errors="replace") as file:
+    st.code(file.read(), language="text")
+else:
+    st.info("Run the test command in PowerShell to display results.")

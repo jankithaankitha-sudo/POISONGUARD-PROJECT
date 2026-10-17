@@ -1,0 +1,25 @@
+POISONGUARD - PROJECT PROGRESS REPORT
+=============================================
+
+1. DETECTION EVALUATION RESULTS
+-----------------------------------
+ contamination  actual_poisoned  isolation_suspicious  isolation_detection_rate  label_disagreements  label_true_positives  label_false_positives  label_false_negatives  label_detection_rate  label_false_positive_rate
+          0.05               45                    23                    0.0222                   45                    45                      0                      0                   1.0                        0.0
+          0.10               45                    46                    0.0444                   45                    45                      0                      0                   1.0                        0.0
+          0.15               45                    69                    0.0889                   45                    45                      0                      0                   1.0                        0.0
+          0.20               45                    91                    0.1333                   45                    45                      0                      0                   1.0                        0.0
+
+2. MITIGATION EVALUATION RESULTS
+-----------------------------------
+    model  accuracy  precision  recall  f1_score
+ Baseline    0.9561     0.9589  0.9722    0.9655
+ Poisoned    0.9474     0.9714  0.9444    0.9577
+Mitigated    0.9561     0.9718  0.9583    0.9650
+
+3. LIMITATIONS
+-----------------------------------
+Anomaly detection may flag clean samples as suspicious and may miss poisoned samples. Results should be interpreted using the known simulated poison labels.
+
+4. CONCLUSION
+-----------------------------------
+The experiments compare detection methods and model performance before and after mitigation. Further improvements are needed to reduce false positives and false negatives.

@@ -1,0 +1,13 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.2, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\User\OneDrive\Desktop\POISONGUARD PROJECT\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\User\OneDrive\Desktop\POISONGUARD PROJECT
+plugins: anyio-4.15.1
+collecting ... collected 4 items
+
+tests/test_backdoor.py::test_backdoor_attack PASSED                      [ 25%]
+tests/test_poisoning.py::test_label_flip_attack PASSED                   [ 50%]
+tests/test_progress.py::test_detection_returns_valid_metrics PASSED      [ 75%]
+tests/test_progress.py::test_mitigation_removes_selected_samples PASSED  [100%]
+
+============================== 4 passed in 9.98s ==============================
