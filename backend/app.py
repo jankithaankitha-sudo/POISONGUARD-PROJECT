@@ -9,6 +9,7 @@ from models.model_engine import (
     evaluate_model,
     save_model
 )
+from models.robust_training import load_robust_model
 
 from attacks.poisoning.label_flip import label_flip_attack
 
@@ -56,6 +57,50 @@ def health():
         "backend": "Flask",
         "ml_engine": "Random Forest"
     })
+
+# ============================================================
+# ROBUST TRAINING
+# ============================================================
+
+@app.route("/api/robust-training", methods=["POST"])
+def robust_training():
+
+    model_path = "models/trained_models/robust_ensemble_model.pkl"
+
+    if not os.path.exists(model_path):
+        return jsonify({
+            "error": "Robust ensemble model is not available."
+        }), 404
+
+    try:
+        # Load the previously trained ensemble model
+        robust_model = load_robust_model()
+
+        # Load test dataset
+        X, y = load_dataset()
+        X_train, X_test, y_train, y_test = split_dataset(X, y)
+
+        # Evaluate the saved model
+        results = evaluate_model(
+            robust_model,
+            X_test,
+            y_test
+        )
+
+        PROJECT_STATE["robust_model"] = robust_model
+        PROJECT_STATE["robust_results"] = results
+
+        return jsonify({
+            "stage": "robust_training",
+            "model": "Voting Ensemble",
+            "status": "success",
+            "results": results
+        })
+
+    except Exception as error:
+        return jsonify({
+            "error": str(error)
+        }), 500
 
 
 # ============================================================

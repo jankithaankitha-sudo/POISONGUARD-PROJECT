@@ -150,6 +150,23 @@ st.sidebar.header("PoisonGuard Pipeline")
 
 
 # ==========================================
+# ROBUST TRAINING
+# ==========================================
+
+if st.sidebar.button("9. Run Robust Training"):
+
+    result = call_api("/api/robust-training")
+
+    if result:
+
+        st.session_state["robust_training"] = result
+
+        st.success(
+            "Robust Ensemble evaluation completed."
+        )
+
+
+# ==========================================
 # 1. TRAIN BASELINE
 # ==========================================
 
@@ -287,6 +304,41 @@ if st.sidebar.button("7️⃣ Final Evaluation"):
             "Evaluation completed."
         )
 
+
+# ==========================================
+# ROBUST TRAINING RESULTS
+# ==========================================
+
+st.divider()
+st.header("Robust Training Results")
+
+if "robust_training" in st.session_state:
+
+    robust_data = st.session_state["robust_training"]
+
+    if "results" in robust_data:
+
+        results = robust_data["results"]
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric("Accuracy", results["accuracy"])
+        col2.metric("Precision", results["precision"])
+        col3.metric("Recall", results["recall"])
+        col4.metric("F1 Score", results["f1_score"])
+
+        st.subheader("Confusion Matrix")
+
+        st.dataframe(
+            pd.DataFrame(results["confusion_matrix"]),
+            use_container_width=True
+        )
+
+    else:
+        st.error(robust_data.get("error", "No results available."))
+
+else:
+    st.info("Click Run Robust Training to view results.")
 
 # ==========================================
 # 8. MODEL INTEGRITY
